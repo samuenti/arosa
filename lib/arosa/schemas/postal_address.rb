@@ -2,6 +2,9 @@
 
 module Arosa
   module Schemas
+    # Schema.org PostalAddress type
+    #
+    # https://schema.org/PostalAddress
     class PostalAddress < Schema
       schema_type "PostalAddress"
 

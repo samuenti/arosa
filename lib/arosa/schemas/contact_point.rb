@@ -2,6 +2,9 @@
 
 module Arosa
   module Schemas
+    # Schema.org ContactPoint type
+    #
+    # https://schema.org/ContactPoint
     class ContactPoint < Schema
       schema_type "ContactPoint"
 

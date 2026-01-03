@@ -2,6 +2,9 @@
 
 module Arosa
   module Schemas
+    # Schema.org Organization type
+    #
+    # https://schema.org/Organization
     class Organization < Schema
       schema_type "Organization"
 
