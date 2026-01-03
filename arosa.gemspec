@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["contact@samuenti.com"]
 
   spec.summary = "Generate schema.org structured data as JSON-LD"
-  spec.description = "A Ruby gem for generating schema.org structured data for rich results and enhanced search appearance."
+  spec.description = "A Ruby gem for generating schema.org structured data for rich results."
 
   spec.homepage = "https://github.com/samuenti/arosa"
   spec.license = "MIT"
@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/samuenti/arosa"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
