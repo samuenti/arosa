@@ -9,6 +9,8 @@ require_relative "arosa/schema"
 require_relative "arosa/schemas/postal_address"
 require_relative "arosa/schemas/contact_point"
 require_relative "arosa/schemas/organization"
+require_relative "arosa/schemas/list_item"
+require_relative "arosa/schemas/breadcrumb_list"
 
 module Arosa
   class Error < StandardError; end

@@ -82,6 +82,8 @@ No silent failures. If it builds, the markup is valid.
 | Organization | [schema.org/Organization](https://schema.org/Organization) |
 | PostalAddress | [schema.org/PostalAddress](https://schema.org/PostalAddress) |
 | ContactPoint | [schema.org/ContactPoint](https://schema.org/ContactPoint) |
+| BreadcrumbList | [schema.org/BreadcrumbList](https://schema.org/BreadcrumbList) |
+| ListItem | [schema.org/ListItem](https://schema.org/ListItem) |
 
 More types coming.
 

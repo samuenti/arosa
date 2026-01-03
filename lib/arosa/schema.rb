@@ -64,7 +64,8 @@ module Arosa
     end
 
     def to_html
-      %(<script type="application/ld+json">#{to_json}</script>)
+      html = %(<script type="application/ld+json">#{to_json}</script>)
+      html.respond_to?(:html_safe) ? html.html_safe : html
     end
 
     alias to_s to_html
