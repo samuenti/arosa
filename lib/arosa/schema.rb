@@ -37,6 +37,7 @@ module Arosa
     def initialize(**attrs)
       @values = {}
       attrs.each { |key, value| send("#{key}=", value) }
+      raise ArgumentError, "Missing required: #{missing_required.join(", ")}" if missing_required.any?
     end
 
     def valid?
