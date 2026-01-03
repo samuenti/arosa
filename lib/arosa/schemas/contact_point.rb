@@ -11,6 +11,7 @@ module Arosa
       property :contact_type, type: String
       property :telephone, type: String
       property :email, type: String
+      property :available_language, type: Array
     end
   end
 end

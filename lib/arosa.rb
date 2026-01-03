@@ -7,6 +7,7 @@ require_relative "arosa/schema"
 
 # Schemas
 require_relative "arosa/schemas/postal_address"
+require_relative "arosa/schemas/language"
 require_relative "arosa/schemas/contact_point"
 require_relative "arosa/schemas/organization"
 require_relative "arosa/schemas/list_item"

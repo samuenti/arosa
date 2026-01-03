@@ -77,8 +77,8 @@ module Arosa
         inner = type.first
         return if value.is_a?(inner)
         return if value.is_a?(Array) && value.all? { |v| v.is_a?(inner) }
-      else
-        return if value.is_a?(type)
+      elsif value.is_a?(type)
+        return
       end
 
       raise ArgumentError, "#{name} must be a #{type}, got #{value.class}"
