@@ -72,8 +72,13 @@ module Arosa
     private
 
     def validate_type!(name, value, type)
-      return if type.is_a?(Array) && value.is_a?(Array) && value.all? { |v| v.is_a?(type.first) }
-      return if value.is_a?(type)
+      if type.is_a?(Array)
+        inner = type.first
+        return if value.is_a?(inner)
+        return if value.is_a?(Array) && value.all? { |v| v.is_a?(inner) }
+      else
+        return if value.is_a?(type)
+      end
 
       raise ArgumentError, "#{name} must be a #{type}, got #{value.class}"
     end

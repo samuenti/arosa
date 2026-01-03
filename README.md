@@ -1,35 +1,90 @@
 # Arosa
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/arosa`. To experiment with that code, run `bin/console` for an interactive prompt.
+Generate [schema.org](https://schema.org) structured data as JSON-LD. Drop it into your pages and let search engines understand your content.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
-Install the gem and add to the application's Gemfile by executing:
-
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+```ruby
+gem 'arosa'
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
-```
+Then `bundle install`.
 
 ## Usage
 
-TODO: Write usage instructions here
+Arosa works anywhere in your Ruby code. Build the schema, then output it in your view.
 
-## Development
+Here's an example of an Organization schema:
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+```ruby
+@org = Arosa::Schemas::Organization.new(
+  name: "Acme Corp",
+  url: "https://acme.com",
+  logo: "https://acme.com/logo.png",
+  email: "hello@acme.com",
+  founding_date: Date.new(2020, 1, 1),
+  address: Arosa::Schemas::PostalAddress.new(
+    street_address: "123 Main St",
+    address_locality: "Zug",
+    address_country: "CH",
+    postal_code: "6300"
+  )
+)
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+In your view:
 
-## Contributing
+```erb
+<%= @org %>
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/arosa.
+Which will output:
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Acme Corp",
+  "url": "https://acme.com",
+  "logo": "https://acme.com/logo.png",
+  "email": "hello@acme.com",
+  "foundingDate": "2020-01-01",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Main St",
+    "addressLocality": "Zug",
+    "addressCountry": "CH",
+    "postalCode": "6300"
+  }
+}
+</script>
+```
+
+## Validation
+
+Wrong types and unknown properties raise errors immediately:
+
+```ruby
+Arosa::Schemas::Organization.new(name: 123)
+# => ArgumentError: name must be a String, got Integer
+
+Arosa::Schemas::Organization.new(made_up: "value")
+# => NoMethodError: undefined method `made_up='
+```
+
+No silent failures. If it builds, the markup is valid.
+
+## Supported Types
+
+| Type | Schema.org |
+|------|------------|
+| Organization | [schema.org/Organization](https://schema.org/Organization) |
+| PostalAddress | [schema.org/PostalAddress](https://schema.org/PostalAddress) |
+| ContactPoint | [schema.org/ContactPoint](https://schema.org/ContactPoint) |
+
+More types coming.
+
+## License
+
+MIT
