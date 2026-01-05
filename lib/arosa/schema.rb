@@ -64,7 +64,7 @@ module Arosa
     end
 
     def to_html
-      html = %(<script type="application/ld+json">#{to_json}</script>)
+      html = %(<script type="application/ld+json" data-turbo-temporary>#{to_json}</script>)
       html.respond_to?(:html_safe) ? html.html_safe : html
     end
 
