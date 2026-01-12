@@ -24,6 +24,7 @@ Then `bundle install`.
 | [BreadcrumbList](#breadcrumblist) | [schema.org/BreadcrumbList](https://schema.org/BreadcrumbList) |
 | [ListItem](#listitem) | [schema.org/ListItem](https://schema.org/ListItem) |
 | [Language](#language) | [schema.org/Language](https://schema.org/Language) |
+| [WebApplication](#webapplication) | [schema.org/WebApplication](https://schema.org/WebApplication) |
 
 More types coming.
 
@@ -210,6 +211,48 @@ Note: `item` is optional on the last breadcrumb (the current page).
 Arosa::Schemas::Language.new(
   name: "Spanish",
   alternate_name: "es"
+)
+```
+
+### WebApplication
+
+| Property | Type |
+|----------|------|
+| name | String |
+| description | String |
+| url | String |
+| image | String |
+| application_category | String |
+| application_sub_category | String |
+| browser_requirements | String |
+| operating_system | String |
+| software_version | String |
+| download_url | String |
+| install_url | String |
+| screenshot | Array of String |
+| feature_list | Array of String |
+| release_notes | String |
+| permissions | String |
+| software_requirements | String |
+| same_as | Array of String |
+
+```ruby
+Arosa::Schemas::WebApplication.new(
+  name: "Acme Task Manager",
+  description: "A web-based task management application",
+  url: "https://tasks.acme.com",
+  application_category: "BusinessApplication",
+  browser_requirements: "Requires JavaScript and HTML5 support",
+  software_version: "2.1.0",
+  feature_list: [
+    "Real-time collaboration",
+    "Calendar integration",
+    "Mobile-friendly interface"
+  ],
+  screenshot: [
+    "https://tasks.acme.com/screenshots/dashboard.png",
+    "https://tasks.acme.com/screenshots/calendar.png"
+  ]
 )
 ```
 

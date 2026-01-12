@@ -12,6 +12,7 @@ require_relative "arosa/schemas/contact_point"
 require_relative "arosa/schemas/organization"
 require_relative "arosa/schemas/list_item"
 require_relative "arosa/schemas/breadcrumb_list"
+require_relative "arosa/schemas/web_application"
 
 module Arosa
   class Error < StandardError; end
