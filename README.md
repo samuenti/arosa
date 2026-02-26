@@ -25,6 +25,7 @@ Then `bundle install`.
 | [ListItem](#listitem) | [schema.org/ListItem](https://schema.org/ListItem) |
 | [Language](#language) | [schema.org/Language](https://schema.org/Language) |
 | [WebApplication](#webapplication) | [schema.org/WebApplication](https://schema.org/WebApplication) |
+| [Article](#article) | [schema.org/Article](https://schema.org/Article) |
 
 More types coming.
 
@@ -253,6 +254,51 @@ Arosa::Schemas::WebApplication.new(
     "https://tasks.acme.com/screenshots/dashboard.png",
     "https://tasks.acme.com/screenshots/calendar.png"
   ]
+)
+```
+
+### Article
+
+| Property | Type |
+|----------|------|
+| name | String |
+| url | String |
+| image | String |
+| same_as | Array of String |
+| headline | String |
+| alternative_headline | String |
+| description | String |
+| author | String |
+| publisher | String |
+| date_published | Date |
+| date_modified | Date |
+| date_created | Date |
+| keywords | String |
+| in_language | String |
+| thumbnail_url | String |
+| abstract | String |
+| comment_count | Integer |
+| copyright_holder | String |
+| copyright_year | Integer |
+| editor | String |
+| genre | String |
+| is_accessible_for_free | Boolean |
+| license | String |
+| article_section | String |
+| word_count | Integer |
+
+```ruby
+Arosa::Schemas::Article.new(
+  headline: "How to Tie a Reef Knot",
+  author: "John Doe",
+  date_published: Date.new(2026, 2, 26),
+  description: "A step-by-step guide to tying the classic reef knot.",
+  article_section: "Outdoors",
+  word_count: 1200,
+  image: "https://example.com/images/reef-knot.jpg",
+  keywords: "knots, sailing, outdoors",
+  in_language: "en",
+  is_accessible_for_free: true
 )
 ```
 
