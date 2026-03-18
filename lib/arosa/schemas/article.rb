@@ -15,8 +15,8 @@ module Arosa
       property :headline, type: String
       property :alternative_headline, type: String
       property :description, type: String
-      property :author, type: String
-      property :publisher, type: String
+      property :author
+      property :publisher
       property :date_published, type: Date
       property :date_modified, type: Date
       property :date_created, type: Date
