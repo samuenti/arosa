@@ -22,9 +22,10 @@ module Arosa
       tags = []
 
       tags << @meta.render(request: request, **combined)
-      tags << schema_tag(merged[:schema], context: @defaults[:schemas] || {})
+      tags << schema_tag(@meta.data[:schema], context: @defaults[:schemas] || {})
 
-      tags.compact.join("\n")
+      html = tags.compact.join("\n")
+      html.respond_to?(:html_safe) ? html.html_safe : html
     end
 
     private

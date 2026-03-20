@@ -122,6 +122,7 @@ Output:
 |--------|-------------|
 | `title` | Page title |
 | `description` | Page description |
+| `keywords` | Keywords as a string or array |
 | `site` | Site name, appended to the title |
 | `reverse` | When `true`, site name comes first |
 | `canonical` | Canonical URL for the page |
@@ -131,6 +132,7 @@ Output:
 | `noarchive` | Tells search engines not to cache the page |
 | `index` | Explicitly allow indexing |
 | `follow` | Explicitly allow link following |
+| `refresh` | Refresh interval in seconds, or `"5;url=https://..."` to redirect |
 | `og` | Open Graph tags (Hash) |
 | `twitter` | Twitter Card tags (Hash) |
 | `schema` | Schema.org structured data (Hash or Symbol) |

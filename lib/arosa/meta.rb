@@ -23,14 +23,15 @@ module Arosa
       tags << charset_tag(merged[:charset] || "utf-8")
       tags << title_tag(merged)
       tags << description_tag(merged[:description])
+      tags << keywords_tag(merged[:keywords])
       tags << canonical_tag(merged, request: request, noindex: noindex)
       tags << robots_tag(merged)
+      tags << refresh_tag(merged[:refresh])
       tags.concat(hreflang_tags(merged, request: request))
       tags.concat(og_tags(merged))
       tags.concat(twitter_tags(merged))
 
-      html = tags.compact.join("\n")
-      html.respond_to?(:html_safe) ? html.html_safe : html
+      tags.compact.join("\n")
     end
 
     private
@@ -59,6 +60,13 @@ module Arosa
       %(<meta name="description" content="#{escape(description)}">)
     end
 
+    def keywords_tag(keywords)
+      return unless keywords
+
+      value = keywords.is_a?(Array) ? keywords.join(", ") : keywords
+      %(<meta name="keywords" content="#{escape(value)}">)
+    end
+
     def canonical_tag(merged, request: nil, noindex: false)
       canonical = merged[:canonical]
       canonical ||= request&.url if merged[:auto_canonical] && !noindex
@@ -72,6 +80,12 @@ module Arosa
       return if directives.empty?
 
       %(<meta name="robots" content="#{directives.join(", ")}">)
+    end
+
+    def refresh_tag(refresh)
+      return unless refresh
+
+      %(<meta http-equiv="refresh" content="#{escape(refresh)}">)
     end
 
     def hreflang_tags(merged, request: nil)
