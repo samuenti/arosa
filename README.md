@@ -78,6 +78,10 @@ Output:
 | `noarchive` | Tells search engines not to cache the page |
 | `index` | Explicitly allow indexing |
 | `follow` | Explicitly allow link following |
+| `hreflang` | Array of locale codes for alternate language tags |
+| `hreflang_opt_in` | When `true`, pages must opt in to hreflang with `set_arosa hreflang: true` |
+| `hreflang_default` | Locale to use for `x-default`. Defaults to first in the `hreflang` array |
+| `hreflang_pattern` | Custom URL pattern. Use `:locale` and `:path` as placeholders |
 
 ### Defaults
 
@@ -113,6 +117,61 @@ Output:
 
 ```html
 <meta name="robots" content="noindex, nofollow">
+```
+
+### Hreflang
+
+Add alternate language tags for multilingual pages. Define your locales in the layout:
+
+```erb
+<%= arosa_tags hreflang: ["en", "de", "fr", "it"] %>
+```
+
+Output (on `https://example.com/articles/1`):
+
+```html
+<link rel="alternate" hreflang="en" href="https://example.com/en/articles/1">
+<link rel="alternate" hreflang="de" href="https://example.com/de/articles/1">
+<link rel="alternate" hreflang="fr" href="https://example.com/fr/articles/1">
+<link rel="alternate" hreflang="it" href="https://example.com/it/articles/1">
+<link rel="alternate" hreflang="x-default" href="https://example.com/en/articles/1">
+```
+
+An `x-default` tag is automatically included, pointing to the first locale in the array. To use a different default:
+
+```erb
+<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_default: "de" %>
+```
+
+By default, URLs are built as `/:locale/path`. For other structures, use a pattern:
+
+```erb
+<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_pattern: "https://:locale.example.com:path" %>
+```
+
+URL parameters are also supported but [not recommended by Google](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites):
+
+```erb
+<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_pattern: "https://example.com:path?loc=:locale" %>
+```
+
+To require pages to opt in instead of enabling globally:
+
+```erb
+<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_opt_in: true %>
+```
+
+Then in a view or controller:
+
+```ruby
+set_arosa hreflang: true
+```
+
+Pages can also narrow the locales or disable entirely:
+
+```ruby
+set_arosa hreflang: ["de"]
+set_arosa hreflang: false
 ```
 
 ### Multiple calls

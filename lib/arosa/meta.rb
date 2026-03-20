@@ -16,6 +16,7 @@ module Arosa
 
     def render(request: nil, **defaults)
       merged = defaults.merge(@data)
+      merged[:_defaults] = defaults
       noindex = merged[:noindex]
       tags = []
 
@@ -24,6 +25,7 @@ module Arosa
       tags << description_tag(merged[:description])
       tags << canonical_tag(merged, request: request, noindex: noindex)
       tags << robots_tag(merged)
+      tags.concat(hreflang_tags(merged, request: request))
 
       html = tags.compact.join("\n")
       html.respond_to?(:html_safe) ? html.html_safe : html
@@ -68,6 +70,50 @@ module Arosa
       return if directives.empty?
 
       %(<meta name="robots" content="#{directives.join(", ")}">)
+    end
+
+    def hreflang_tags(merged, request: nil)
+      defaults = merged[:_defaults] || {}
+      page_value = @data[:hreflang]
+      default_locales = defaults[:hreflang]
+      opt_in = merged[:hreflang_opt_in]
+
+      return [] if page_value == false
+      return [] unless default_locales.is_a?(Array)
+
+      if opt_in
+        return [] unless page_value
+      end
+
+      locales = page_value.is_a?(Array) ? page_value : default_locales
+      return [] if locales.empty?
+      return [] unless request
+
+      pattern = merged[:hreflang_pattern]
+      fullpath = request.fullpath
+      origin = "#{request.scheme}://#{request.host}"
+
+      x_default = merged[:hreflang_default] || default_locales&.first
+
+      tags = locales.map do |locale|
+        href = build_hreflang_href(locale, pattern, fullpath, origin)
+        %(<link rel="alternate" hreflang="#{escape(locale)}" href="#{escape(href)}">)
+      end
+
+      if x_default
+        href = build_hreflang_href(x_default, pattern, fullpath, origin)
+        tags << %(<link rel="alternate" hreflang="x-default" href="#{escape(href)}">)
+      end
+
+      tags
+    end
+
+    def build_hreflang_href(locale, pattern, fullpath, origin)
+      if pattern
+        pattern.gsub(":locale", locale.to_s).gsub(":path", fullpath)
+      else
+        "#{origin}/#{locale}#{fullpath}"
+      end
     end
 
     def escape(value)
