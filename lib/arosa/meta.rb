@@ -26,6 +26,8 @@ module Arosa
       tags << canonical_tag(merged, request: request, noindex: noindex)
       tags << robots_tag(merged)
       tags.concat(hreflang_tags(merged, request: request))
+      tags.concat(og_tags(merged))
+      tags.concat(twitter_tags(merged))
 
       html = tags.compact.join("\n")
       html.respond_to?(:html_safe) ? html.html_safe : html
@@ -106,6 +108,34 @@ module Arosa
       end
 
       tags
+    end
+
+    def og_tags(merged)
+      return [] if merged[:auto_og] == false && !merged[:og]
+
+      og = (merged[:og] || {}).dup
+      og[:title] ||= merged[:title]
+      og[:description] ||= merged[:description]
+      return [] if og.compact.empty?
+
+      og.compact.map do |key, value|
+        %(<meta property="og:#{escape(key)}" content="#{escape(value)}">)
+      end
+    end
+
+    def twitter_tags(merged)
+      return [] if merged[:auto_twitter] == false && !merged[:twitter]
+
+      twitter = (merged[:twitter] || {}).dup
+      og = merged[:auto_og] == false ? {} : (merged[:og] || {})
+      twitter[:title] ||= og[:title] || merged[:title]
+      twitter[:description] ||= og[:description] || merged[:description]
+      twitter[:image] ||= og[:image]
+      return [] if twitter.compact.empty?
+
+      twitter.compact.map do |key, value|
+        %(<meta name="twitter:#{escape(key)}" content="#{escape(value)}">)
+      end
     end
 
     def build_hreflang_href(locale, pattern, fullpath, origin)

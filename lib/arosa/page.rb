@@ -2,11 +2,9 @@
 
 module Arosa
   class Page
-    CONFIG_ONLY_KEYS = %i[separator auto_canonical hreflang hreflang_pattern
-                          hreflang_opt_in hreflang_default organization].freeze
-
-    PAGE_ONLY_KEYS = %i[title description canonical charset reverse noindex
-                        nofollow noarchive index follow schema hreflang].freeze
+    CONFIG_ONLY_KEYS = %i[separator auto_canonical auto_og auto_twitter
+                          hreflang_pattern hreflang_opt_in hreflang_default
+                          organization].freeze
 
     def initialize
       @meta = Meta.new
@@ -30,8 +28,7 @@ module Arosa
       tags << @meta.render(request: request, **defaults)
       tags << schema_tag(merged[:schema])
 
-      html = tags.compact.join("\n")
-      html.respond_to?(:html_safe) ? html.html_safe : html
+      tags.compact.join("\n")
     end
 
     private

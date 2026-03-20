@@ -34,6 +34,8 @@ Arosa.config.hreflang = ["en", "de", "fr", "it"]
 Arosa.config.hreflang_pattern = "https://:locale.example.com:path"
 Arosa.config.hreflang_opt_in = true
 Arosa.config.hreflang_default = "en"
+Arosa.config.auto_og = false
+Arosa.config.auto_twitter = false
 
 Arosa.config.organization = {
   type: :organization,
@@ -52,6 +54,8 @@ Arosa.config.organization = {
 | `hreflang_pattern` | Custom URL pattern. Use `:locale` and `:path` as placeholders |
 | `hreflang_opt_in` | When `true`, pages must opt in to hreflang |
 | `hreflang_default` | Locale for `x-default`. Defaults to first in the `hreflang` array |
+| `auto_og` | Auto-generate Open Graph tags from title/description. Default: `true` |
+| `auto_twitter` | Auto-generate Twitter Card tags from title/description. Default: `true` |
 | `organization` | Reusable organization schema hash |
 
 These options can only be set in the config. The layout only accepts `site:`.
@@ -124,6 +128,9 @@ Output:
 | `noarchive` | Tells search engines not to cache the page |
 | `index` | Explicitly allow indexing |
 | `follow` | Explicitly allow link following |
+| `og` | Open Graph tags (Hash) |
+| `twitter` | Twitter Card tags (Hash) |
+| `schema` | Schema.org structured data (Hash or Symbol) |
 
 ### Defaults
 
@@ -155,6 +162,49 @@ Output:
 
 ```html
 <meta name="robots" content="noindex, nofollow">
+```
+
+### Open Graph
+
+`og:title` and `og:description` are automatically set from `title` and `description`. Override them or add more:
+
+```ruby
+set_arosa(
+  title: "Arosa to Lenzerheide",
+  description: "The complete trail guide.",
+  og: { image: "https://example.com/trail.jpg", type: "article" }
+)
+```
+
+Output:
+
+```html
+<meta property="og:title" content="Arosa to Lenzerheide">
+<meta property="og:description" content="The complete trail guide.">
+<meta property="og:image" content="https://example.com/trail.jpg">
+<meta property="og:type" content="article">
+```
+
+To use a different title or description for social:
+
+```ruby
+set_arosa(
+  title: "Arosa to Lenzerheide — Dashboard",
+  og: { title: "Arosa to Lenzerheide", description: "Shorter for social" }
+)
+```
+
+### Twitter Cards
+
+```ruby
+set_arosa twitter: { card: "summary_large_image", site: "@acme" }
+```
+
+Output:
+
+```html
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@acme">
 ```
 
 ### Hreflang

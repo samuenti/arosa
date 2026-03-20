@@ -37,6 +37,10 @@ module Arosa
     end
 
     def self.resolve(name)
+      unless Arosa.config.respond_to?(name)
+        raise ArgumentError, "Unknown config key :#{name}"
+      end
+
       value = Arosa.config.public_send(name)
       raise ArgumentError, "No config found for :#{name}" unless value
 

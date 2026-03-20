@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["Samuenti"]
   spec.email = ["contact@samuenti.com"]
 
-  spec.summary = "Generate schema.org structured data as JSON-LD"
-  spec.description = "A Ruby gem for generating schema.org structured data for rich results."
+  spec.summary = "Meta tags and structured data for Rails"
+  spec.description = "Meta tags, Open Graph, hreflang, and JSON-LD structured data for Rails."
 
   spec.homepage = "https://github.com/samuenti/arosa"
   spec.license = "MIT"
