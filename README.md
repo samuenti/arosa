@@ -14,13 +14,16 @@ gem 'arosa'
 
 Then `bundle install`.
 
-Add `arosa_tags` to your layout. This is required, it renders all your meta tags.
+Add `arosa_defaults` and `arosa_tags` to your layout.
 
 ```erb
 <head>
-  <%= arosa_tags site: "My Website" %>
+  <% arosa_defaults site: "My Website", schemas: { organization: { type: :organization, name: "Acme Corp" } } %>
+  <%= arosa_tags %>
 </head>
 ```
+
+`arosa_defaults` stores your site name and reusable data. `arosa_tags` renders everything.
 
 ## Configuration
 
@@ -36,29 +39,28 @@ Arosa.config.hreflang_opt_in = true
 Arosa.config.hreflang_default = "en"
 Arosa.config.auto_og = false
 Arosa.config.auto_twitter = false
-
-Arosa.config.organization = {
-  type: :organization,
-  name: "Acme Corp",
-  url: "https://acme.com",
-  logo: "https://acme.com/logo.png",
-  email: "hello@acme.com"
-}
 ```
 
 | Option | Description |
 |--------|-------------|
 | `separator` | Text between page title and site name. Default: `\|` |
-| `auto_canonical` | When `true`, uses the current request URL as canonical |
-| `hreflang` | Array of locale codes for alternate language tags |
-| `hreflang_pattern` | Custom URL pattern. Use `:locale` and `:path` as placeholders |
-| `hreflang_opt_in` | When `true`, pages must opt in to hreflang |
-| `hreflang_default` | Locale for `x-default`. Defaults to first in the `hreflang` array |
+| `auto_canonical` | Auto-generate canonical URL from the current request. Default: `false` |
+| `hreflang` | Array of locale codes for alternate language tags. Default: `nil` (disabled) |
+| `hreflang_pattern` | Custom URL pattern. Use `:locale` and `:path` as placeholders. Default: `/:locale/path` |
+| `hreflang_opt_in` | Pages must opt in to hreflang instead of global. Default: `false` |
+| `hreflang_default` | Locale for `x-default`. Default: first in the `hreflang` array |
 | `auto_og` | Auto-generate Open Graph tags from title/description. Default: `true` |
 | `auto_twitter` | Auto-generate Twitter Card tags from title/description. Default: `true` |
-| `organization` | Reusable organization schema hash |
 
-These options can only be set in the config. The layout only accepts `site:`.
+These options can only be set in the config.
+
+### Layout Defaults
+
+Use `arosa_defaults` in the layout to set the site name and reusable schema definitions.
+
+```erb
+<% arosa_defaults site: "My Website", schemas: { organization: { type: :organization, name: "Acme Corp", description: t("org.description") } } %>
+```
 
 The organization can be referenced by name on any page:
 
@@ -72,7 +74,7 @@ Or as a nested value:
 set_arosa schema: { type: :article, headline: "My Article", author: :organization }
 ```
 
-If a page passes a full hash instead, the config is ignored completely.
+If a page passes a full hash instead, the default is ignored completely.
 
 ## Meta Tags
 
@@ -99,7 +101,8 @@ end
 
 ```erb
 <head>
-  <%= arosa_tags site: "My Website" %>
+  <% arosa_defaults site: "My Website" %>
+  <%= arosa_tags %>
 </head>
 ```
 
@@ -134,10 +137,10 @@ Output:
 
 ### Defaults
 
-The layout accepts `site:` and `description:` as fallback defaults. Page-level values from `set_arosa` override them.
+Use `arosa_defaults` in the layout to set fallback values. Page-level values from `set_arosa` override them.
 
 ```erb
-<%= arosa_tags site: "My Website", description: "Default description for pages that don't set one." %>
+<% arosa_defaults site: "My Website", description: "Default description for pages that don't set one." %>
 ```
 
 ### Canonical

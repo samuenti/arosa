@@ -13,8 +13,8 @@ module Arosa
       web_application: "Arosa::Schemas::WebApplication"
     }.freeze
 
-    def self.build(input)
-      input = resolve(input) if input.is_a?(Symbol)
+    def self.build(input, context: {})
+      input = resolve(input, context: context) if input.is_a?(Symbol)
       raise ArgumentError, "Expected a Hash, got #{input.class}" unless input.is_a?(Hash)
 
       hash = input.dup
@@ -26,9 +26,9 @@ module Arosa
 
       attrs = hash.transform_values do |value|
         case value
-        when Symbol then build(value)
-        when Hash then value[:type] ? build(value) : value
-        when Array then value.map { |v| v.is_a?(Hash) && v[:type] ? build(v) : v }
+        when Symbol then build(value, context: context)
+        when Hash then value[:type] ? build(value, context: context) : value
+        when Array then value.map { |v| v.is_a?(Hash) && v[:type] ? build(v, context: context) : v }
         else value
         end
       end
@@ -36,13 +36,9 @@ module Arosa
       klass.new(**attrs)
     end
 
-    def self.resolve(name)
-      unless Arosa.config.respond_to?(name)
-        raise ArgumentError, "Unknown config key :#{name}"
-      end
-
-      value = Arosa.config.public_send(name)
-      raise ArgumentError, "No config found for :#{name}" unless value
+    def self.resolve(name, context: {})
+      value = context[name]
+      raise ArgumentError, "No definition found for :#{name}" unless value
 
       value
     end

@@ -2,7 +2,7 @@
 
 module Arosa
   class Config
-    attr_accessor :organization, :separator, :hreflang, :hreflang_pattern,
+    attr_accessor :separator, :hreflang, :hreflang_pattern,
                   :hreflang_opt_in, :hreflang_default, :auto_canonical,
                   :auto_og, :auto_twitter
 

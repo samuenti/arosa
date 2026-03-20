@@ -6,9 +6,13 @@ module Arosa
       arosa_page.set(**attrs)
     end
 
-    def arosa_tags(**defaults)
+    def arosa_defaults(**attrs)
+      arosa_page.defaults(**attrs)
+    end
+
+    def arosa_tags
       req = respond_to?(:request) ? request : nil
-      arosa_page.render(request: req, **defaults)
+      arosa_page.render(request: req)
     end
 
     private
