@@ -2,9 +2,9 @@
 
 [![Gem Version](https://badge.fury.io/rb/arosa.svg)](https://badge.fury.io/rb/arosa) ![Gem Total Downloads](https://img.shields.io/gem/dt/arosa?style=flat&link=https%3A%2F%2Frubygems.org%2Fgems%2Farosa) ![GitHub License](https://img.shields.io/github/license/samuenti/arosa)
 
-Generate [schema.org](https://schema.org) structured data as JSON-LD. Drop it into your pages and let search engines understand your content.
+Meta tags and structured data for Rails. Drop it in and go.
 
-Arosa works anywhere in your Ruby code. Build the schema, then output it in your view.
+Arosa works out of the box with Rails. Set your tags in a controller or view, render them in your layout.
 
 ## Installation
 
@@ -14,7 +14,122 @@ gem 'arosa'
 
 Then `bundle install`.
 
-## Supported Types
+Add `arosa_tags` to your layout. This is required, it renders all your meta tags.
+
+```erb
+<head>
+  <%= arosa_tags site: "My Website" %>
+</head>
+```
+
+## Meta Tags
+
+Set meta tags anywhere, controllers or views.
+
+### In a controller
+
+```ruby
+class ArticlesController < ApplicationController
+  def show
+    @article = Article.find(params[:id])
+    set_arosa title: @article.title, description: @article.excerpt
+  end
+end
+```
+
+### In a view
+
+```erb
+<% set_arosa title: @article.title, description: @article.excerpt %>
+```
+
+### In your layout
+
+```erb
+<head>
+  <%= arosa_tags site: "My Website" %>
+</head>
+```
+
+Output:
+
+```html
+<head>
+  <meta charset="utf-8">
+  <title>Arosa to Lenzerheide: The Complete Trail Guide | My Website</title>
+  <meta name="description" content="Everything you need to know about the trail from Arosa to Lenzerheide.">
+</head>
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `title` | Page title |
+| `description` | Page description |
+| `site` | Site name, appended to the title |
+| `separator` | Text between page title and site name. Default: `\|` |
+| `reverse` | When `true`, site name comes first |
+| `canonical` | Canonical URL for the page |
+| `auto_canonical` | When `true`, uses the current request URL as canonical |
+| `charset` | Character set. Default: `utf-8` |
+| `noindex` | Tells search engines not to index the page |
+| `nofollow` | Tells search engines not to follow links |
+| `noarchive` | Tells search engines not to cache the page |
+| `index` | Explicitly allow indexing |
+| `follow` | Explicitly allow link following |
+
+### Defaults
+
+Options passed to `arosa_tags` in the layout act as defaults. Page-level values from `set_arosa` override them.
+
+```erb
+<%= arosa_tags site: "My Website", description: "Default description for pages that don't set one." %>
+```
+
+### Canonical
+
+Set it explicitly:
+
+```ruby
+set_arosa canonical: "https://example.com/articles/1"
+```
+
+Or auto-generate from the current request URL:
+
+```erb
+<%= arosa_tags auto_canonical: true %>
+```
+
+Auto-canonical is skipped when `noindex` is set. Manually set canonicals always render.
+
+### Robots
+
+```ruby
+set_arosa noindex: true, nofollow: true
+```
+
+Output:
+
+```html
+<meta name="robots" content="noindex, nofollow">
+```
+
+### Multiple calls
+
+`set_arosa` merges. Call it as many times as you want:
+
+```ruby
+set_arosa title: "My Page"
+set_arosa description: "About this page"
+set_arosa noindex: true
+```
+
+## Schemas
+
+Generate [schema.org](https://schema.org) structured data as JSON-LD. Build the schema, then output it in your view.
+
+### Supported Types
 
 | Type | Schema.org |
 |------|------------|
@@ -149,14 +264,12 @@ Arosa::Schemas::PostalAddress.new(
 | available_language | Array of String or [Language](#language) |
 
 ```ruby
-# Simple: just language codes
 Arosa::Schemas::ContactPoint.new(
   contact_type: "customer service",
   telephone: "+1-800-555-1234",
   available_language: ["en", "es"]
 )
 
-# Detailed: full Language objects
 Arosa::Schemas::ContactPoint.new(
   contact_type: "customer service",
   telephone: "+1-800-555-1234",
@@ -289,14 +402,14 @@ Arosa::Schemas::WebApplication.new(
 
 ```ruby
 Arosa::Schemas::Article.new(
-  headline: "How to Tie a Reef Knot",
+  headline: "Arosa to Lenzerheide: The Complete Trail Guide",
   author: "John Doe",
   date_published: Date.new(2026, 2, 26),
-  description: "A step-by-step guide to tying the classic reef knot.",
-  article_section: "Outdoors",
+  description: "Everything you need to know about the trail from Arosa to Lenzerheide.",
+  article_section: "Hiking",
   word_count: 1200,
-  image: "https://example.com/images/reef-knot.jpg",
-  keywords: "knots, sailing, outdoors",
+  image: "https://example.com/images/arosa-lenzerheide.jpg",
+  keywords: "hiking, alps, arosa, lenzerheide",
   in_language: "en",
   is_accessible_for_free: true
 )
