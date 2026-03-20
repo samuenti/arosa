@@ -1,0 +1,23 @@
+# frozen_string_literal: true
+
+module Arosa
+  class Config
+    attr_accessor :organization, :separator, :hreflang, :hreflang_pattern,
+                  :hreflang_opt_in, :hreflang_default, :auto_canonical
+
+    def to_h
+      h = {}
+      h[:separator] = separator if separator
+      h[:hreflang] = hreflang if hreflang
+      h[:hreflang_pattern] = hreflang_pattern if hreflang_pattern
+      h[:hreflang_opt_in] = hreflang_opt_in unless hreflang_opt_in.nil?
+      h[:hreflang_default] = hreflang_default if hreflang_default
+      h[:auto_canonical] = auto_canonical unless auto_canonical.nil?
+      h
+    end
+  end
+
+  def self.config
+    @config ||= Config.new
+  end
+end

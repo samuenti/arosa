@@ -14,7 +14,9 @@ require_relative "arosa/schemas/breadcrumb_list"
 require_relative "arosa/schemas/web_application"
 require_relative "arosa/schemas/article"
 
+require_relative "arosa/config"
 require_relative "arosa/meta"
+require_relative "arosa/page"
 require_relative "arosa/view_helpers"
 
 module Arosa

@@ -22,6 +22,54 @@ Add `arosa_tags` to your layout. This is required, it renders all your meta tags
 </head>
 ```
 
+## Configuration
+
+Set site-wide defaults in an initializer.
+
+```ruby
+# config/initializers/arosa.rb
+Arosa.config.separator = "|"
+Arosa.config.auto_canonical = true
+Arosa.config.hreflang = ["en", "de", "fr", "it"]
+Arosa.config.hreflang_pattern = "https://:locale.example.com:path"
+Arosa.config.hreflang_opt_in = true
+Arosa.config.hreflang_default = "en"
+
+Arosa.config.organization = {
+  type: :organization,
+  name: "Acme Corp",
+  url: "https://acme.com",
+  logo: "https://acme.com/logo.png",
+  email: "hello@acme.com"
+}
+```
+
+| Option | Description |
+|--------|-------------|
+| `separator` | Text between page title and site name. Default: `\|` |
+| `auto_canonical` | When `true`, uses the current request URL as canonical |
+| `hreflang` | Array of locale codes for alternate language tags |
+| `hreflang_pattern` | Custom URL pattern. Use `:locale` and `:path` as placeholders |
+| `hreflang_opt_in` | When `true`, pages must opt in to hreflang |
+| `hreflang_default` | Locale for `x-default`. Defaults to first in the `hreflang` array |
+| `organization` | Reusable organization schema hash |
+
+These options can only be set in the config. The layout only accepts `site:`.
+
+The organization can be referenced by name on any page:
+
+```ruby
+set_arosa schema: :organization
+```
+
+Or as a nested value:
+
+```ruby
+set_arosa schema: { type: :article, headline: "My Article", author: :organization }
+```
+
+If a page passes a full hash instead, the config is ignored completely.
+
 ## Meta Tags
 
 Set meta tags anywhere, controllers or views.
@@ -68,24 +116,18 @@ Output:
 | `title` | Page title |
 | `description` | Page description |
 | `site` | Site name, appended to the title |
-| `separator` | Text between page title and site name. Default: `\|` |
 | `reverse` | When `true`, site name comes first |
 | `canonical` | Canonical URL for the page |
-| `auto_canonical` | When `true`, uses the current request URL as canonical |
 | `charset` | Character set. Default: `utf-8` |
 | `noindex` | Tells search engines not to index the page |
 | `nofollow` | Tells search engines not to follow links |
 | `noarchive` | Tells search engines not to cache the page |
 | `index` | Explicitly allow indexing |
 | `follow` | Explicitly allow link following |
-| `hreflang` | Array of locale codes for alternate language tags |
-| `hreflang_opt_in` | When `true`, pages must opt in to hreflang with `set_arosa hreflang: true` |
-| `hreflang_default` | Locale to use for `x-default`. Defaults to first in the `hreflang` array |
-| `hreflang_pattern` | Custom URL pattern. Use `:locale` and `:path` as placeholders |
 
 ### Defaults
 
-Options passed to `arosa_tags` in the layout act as defaults. Page-level values from `set_arosa` override them.
+The layout accepts `site:` and `description:` as fallback defaults. Page-level values from `set_arosa` override them.
 
 ```erb
 <%= arosa_tags site: "My Website", description: "Default description for pages that don't set one." %>
@@ -99,11 +141,7 @@ Set it explicitly:
 set_arosa canonical: "https://example.com/articles/1"
 ```
 
-Or auto-generate from the current request URL:
-
-```erb
-<%= arosa_tags auto_canonical: true %>
-```
+Or enable `auto_canonical` in the config to use the current request URL automatically.
 
 Auto-canonical is skipped when `noindex` is set. Manually set canonicals always render.
 
@@ -121,11 +159,7 @@ Output:
 
 ### Hreflang
 
-Add alternate language tags for multilingual pages. Define your locales in the layout:
-
-```erb
-<%= arosa_tags hreflang: ["en", "de", "fr", "it"] %>
-```
+Configure your locales in the initializer (see [Configuration](#configuration)). Hreflang tags are generated automatically on every page.
 
 Output (on `https://example.com/articles/1`):
 
@@ -137,31 +171,17 @@ Output (on `https://example.com/articles/1`):
 <link rel="alternate" hreflang="x-default" href="https://example.com/en/articles/1">
 ```
 
-An `x-default` tag is automatically included, pointing to the first locale in the array. To use a different default:
+An `x-default` tag is automatically included, pointing to the first locale in the array. Override with `hreflang_default` in the config.
 
-```erb
-<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_default: "de" %>
-```
-
-By default, URLs are built as `/:locale/path`. For other structures, use a pattern:
-
-```erb
-<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_pattern: "https://:locale.example.com:path" %>
-```
+By default, URLs are built as `/:locale/path`. For other structures, set `hreflang_pattern` in the config.
 
 URL parameters are also supported but [not recommended by Google](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites):
 
-```erb
-<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_pattern: "https://example.com:path?loc=:locale" %>
+```ruby
+Arosa.config.hreflang_pattern = "https://example.com:path?loc=:locale"
 ```
 
-To require pages to opt in instead of enabling globally:
-
-```erb
-<%= arosa_tags hreflang: ["en", "de", "fr", "it"], hreflang_opt_in: true %>
-```
-
-Then in a view or controller:
+When `hreflang_opt_in` is enabled in the config, pages must opt in:
 
 ```ruby
 set_arosa hreflang: true
@@ -186,20 +206,43 @@ set_arosa noindex: true
 
 ## Schemas
 
-Generate [schema.org](https://schema.org) structured data as JSON-LD. Build the schema, then output it in your view.
+Generate [schema.org](https://schema.org) structured data as JSON-LD. Pass a schema hash through `set_arosa` and it renders alongside your meta tags.
+
+```ruby
+set_arosa(
+  title: "Acme Corp",
+  description: "We make everything.",
+  schema: {
+    type: :organization,
+    name: "Acme Corp",
+    url: "https://acme.com",
+    logo: "https://acme.com/logo.png",
+    email: "hello@acme.com",
+    founding_date: Date.new(2020, 1, 1),
+    same_as: [
+      "https://linkedin.com/company/acme",
+      "https://en.wikipedia.org/wiki/Acme"
+    ],
+    address: { type: :postal_address, street_address: "123 Main St", address_locality: "Zug", address_country: "CH", postal_code: "6300" },
+    contact_point: { type: :contact_point, contact_type: "customer service", telephone: "+1-800-555-1234", email: "support@acme.com" }
+  }
+)
+```
+
+Nested hashes with a `type:` key are automatically built into schema objects. The JSON-LD `<script>` tag is rendered by `arosa_tags` in the layout alongside everything else.
 
 ### Supported Types
 
-| Type | Schema.org |
-|------|------------|
-| [Organization](#organization) | [schema.org/Organization](https://schema.org/Organization) |
-| [PostalAddress](#postaladdress) | [schema.org/PostalAddress](https://schema.org/PostalAddress) |
-| [ContactPoint](#contactpoint) | [schema.org/ContactPoint](https://schema.org/ContactPoint) |
-| [BreadcrumbList](#breadcrumblist) | [schema.org/BreadcrumbList](https://schema.org/BreadcrumbList) |
-| [ListItem](#listitem) | [schema.org/ListItem](https://schema.org/ListItem) |
-| [Language](#language) | [schema.org/Language](https://schema.org/Language) |
-| [WebApplication](#webapplication) | [schema.org/WebApplication](https://schema.org/WebApplication) |
-| [Article](#article) | [schema.org/Article](https://schema.org/Article) |
+| Type | Key | Schema.org |
+|------|-----|------------|
+| [Organization](#organization) | `:organization` | [schema.org/Organization](https://schema.org/Organization) |
+| [PostalAddress](#postaladdress) | `:postal_address` | [schema.org/PostalAddress](https://schema.org/PostalAddress) |
+| [ContactPoint](#contactpoint) | `:contact_point` | [schema.org/ContactPoint](https://schema.org/ContactPoint) |
+| [BreadcrumbList](#breadcrumblist) | `:breadcrumb_list` | [schema.org/BreadcrumbList](https://schema.org/BreadcrumbList) |
+| [ListItem](#listitem) | `:list_item` | [schema.org/ListItem](https://schema.org/ListItem) |
+| [Language](#language) | `:language` | [schema.org/Language](https://schema.org/Language) |
+| [WebApplication](#webapplication) | `:web_application` | [schema.org/WebApplication](https://schema.org/WebApplication) |
+| [Article](#article) | `:article` | [schema.org/Article](https://schema.org/Article) |
 
 More types coming.
 
@@ -230,69 +273,6 @@ More types coming.
 | number_of_employees | Integer |
 | same_as | Array of String |
 
-```ruby
-@organisation = Arosa::Schemas::Organization.new(
-  name: "Acme Corp",
-  url: "https://acme.com",
-  logo: "https://acme.com/logo.png",
-  email: "hello@acme.com",
-  founding_date: Date.new(2020, 1, 1),
-  same_as: [
-    "https://linkedin.com/company/acme",
-    "https://en.wikipedia.org/wiki/Acme"
-  ],
-  address: Arosa::Schemas::PostalAddress.new(
-    street_address: "123 Main St",
-    address_locality: "Zug",
-    address_country: "CH",
-    postal_code: "6300"
-  ),
-  contact_point: Arosa::Schemas::ContactPoint.new(
-    contact_type: "customer service",
-    telephone: "+1-800-555-1234",
-    email: "support@acme.com"
-  )
-)
-```
-
-In your view:
-
-```erb
-<%= @organisation %>
-```
-
-Output:
-
-```html
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Acme Corp",
-  "url": "https://acme.com",
-  "logo": "https://acme.com/logo.png",
-  "email": "hello@acme.com",
-  "foundingDate": "2020-01-01",
-  "sameAs": ["https://linkedin.com/company/acme", "https://en.wikipedia.org/wiki/Acme"],
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "123 Main St",
-    "addressLocality": "Zug",
-    "addressCountry": "CH",
-    "postalCode": "6300"
-  },
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "contactType": "customer service",
-    "telephone": "+1-800-555-1234",
-    "email": "support@acme.com"
-  }
-}
-</script>
-```
-
-The same pattern applies to all schema types.
-
 ### PostalAddress
 
 | Property | Type |
@@ -303,16 +283,6 @@ The same pattern applies to all schema types.
 | postal_code | String |
 | address_country | String |
 
-```ruby
-Arosa::Schemas::PostalAddress.new(
-  street_address: "123 Main St",
-  address_locality: "Zug",
-  address_region: "ZG",
-  address_country: "CH",
-  postal_code: "6300"
-)
-```
-
 ### ContactPoint
 
 | Property | Type |
@@ -322,23 +292,6 @@ Arosa::Schemas::PostalAddress.new(
 | email | String |
 | available_language | Array of String or [Language](#language) |
 
-```ruby
-Arosa::Schemas::ContactPoint.new(
-  contact_type: "customer service",
-  telephone: "+1-800-555-1234",
-  available_language: ["en", "es"]
-)
-
-Arosa::Schemas::ContactPoint.new(
-  contact_type: "customer service",
-  telephone: "+1-800-555-1234",
-  available_language: [
-    Arosa::Schemas::Language.new(name: "English", alternate_name: "en"),
-    Arosa::Schemas::Language.new(name: "Spanish", alternate_name: "es")
-  ]
-)
-```
-
 ### BreadcrumbList
 
 | Property | Type |
@@ -346,13 +299,14 @@ Arosa::Schemas::ContactPoint.new(
 | item_list_element | Array of [ListItem](#listitem) |
 
 ```ruby
-Arosa::Schemas::BreadcrumbList.new(
+set_arosa schema: {
+  type: :breadcrumb_list,
   item_list_element: [
-    Arosa::Schemas::ListItem.new(position: 1, name: "Home", item: "https://example.com"),
-    Arosa::Schemas::ListItem.new(position: 2, name: "Books", item: "https://example.com/books"),
-    Arosa::Schemas::ListItem.new(position: 3, name: "Science Fiction")
+    { type: :list_item, position: 1, name: "Home", item: "https://example.com" },
+    { type: :list_item, position: 2, name: "Trails", item: "https://example.com/trails" },
+    { type: :list_item, position: 3, name: "Arosa to Lenzerheide" }
   ]
-)
+}
 ```
 
 ### ListItem
@@ -363,14 +317,6 @@ Arosa::Schemas::BreadcrumbList.new(
 | name | String |
 | item | String |
 
-```ruby
-Arosa::Schemas::ListItem.new(
-  position: 1,
-  name: "Books",
-  item: "https://example.com/books"
-)
-```
-
 Note: `item` is optional on the last breadcrumb (the current page).
 
 ### Language
@@ -379,13 +325,6 @@ Note: `item` is optional on the last breadcrumb (the current page).
 |----------|------|
 | name | String |
 | alternate_name | String |
-
-```ruby
-Arosa::Schemas::Language.new(
-  name: "Spanish",
-  alternate_name: "es"
-)
-```
 
 ### WebApplication
 
@@ -408,26 +347,6 @@ Arosa::Schemas::Language.new(
 | permissions | String |
 | software_requirements | String |
 | same_as | Array of String |
-
-```ruby
-Arosa::Schemas::WebApplication.new(
-  name: "Acme Task Manager",
-  description: "A web-based task management application",
-  url: "https://tasks.acme.com",
-  application_category: "BusinessApplication",
-  browser_requirements: "Requires JavaScript and HTML5 support",
-  software_version: "2.1.0",
-  feature_list: [
-    "Real-time collaboration",
-    "Calendar integration",
-    "Mobile-friendly interface"
-  ],
-  screenshot: [
-    "https://tasks.acme.com/screenshots/dashboard.png",
-    "https://tasks.acme.com/screenshots/calendar.png"
-  ]
-)
-```
 
 ### Article
 
@@ -460,18 +379,35 @@ Arosa::Schemas::WebApplication.new(
 | word_count | Integer |
 
 ```ruby
-Arosa::Schemas::Article.new(
-  headline: "Arosa to Lenzerheide: The Complete Trail Guide",
-  author: "John Doe",
-  date_published: Date.new(2026, 2, 26),
+set_arosa(
+  title: "Arosa to Lenzerheide: The Complete Trail Guide",
   description: "Everything you need to know about the trail from Arosa to Lenzerheide.",
-  article_section: "Hiking",
-  word_count: 1200,
-  image: "https://example.com/images/arosa-lenzerheide.jpg",
-  keywords: "hiking, alps, arosa, lenzerheide",
-  in_language: "en",
-  is_accessible_for_free: true
+  schema: {
+    type: :article,
+    headline: "Arosa to Lenzerheide: The Complete Trail Guide",
+    author: "John Doe",
+    date_published: Date.new(2026, 2, 26),
+    description: "Everything you need to know about the trail from Arosa to Lenzerheide.",
+    article_section: "Hiking",
+    word_count: 1200,
+    image: "https://example.com/images/arosa-lenzerheide.jpg",
+    keywords: "hiking, alps, arosa, lenzerheide",
+    in_language: "en",
+    is_accessible_for_free: true
+  }
 )
+```
+
+### Direct usage
+
+Schemas can also be built and rendered directly without `set_arosa`:
+
+```ruby
+@schema = Arosa::Schemas::Organization.new(name: "Acme Corp", url: "https://acme.com")
+```
+
+```erb
+<%= @schema %>
 ```
 
 ## Validation

@@ -2,6 +2,47 @@
 
 module Arosa
   class Schema
+    TYPES = {
+      article: "Arosa::Schemas::Article",
+      breadcrumb_list: "Arosa::Schemas::BreadcrumbList",
+      contact_point: "Arosa::Schemas::ContactPoint",
+      language: "Arosa::Schemas::Language",
+      list_item: "Arosa::Schemas::ListItem",
+      organization: "Arosa::Schemas::Organization",
+      postal_address: "Arosa::Schemas::PostalAddress",
+      web_application: "Arosa::Schemas::WebApplication"
+    }.freeze
+
+    def self.build(input)
+      input = resolve(input) if input.is_a?(Symbol)
+      raise ArgumentError, "Expected a Hash, got #{input.class}" unless input.is_a?(Hash)
+
+      hash = input.dup
+      type = hash.delete(:type)
+      klass = TYPES[type]
+      raise ArgumentError, "Unknown schema type: #{type}" unless klass
+
+      klass = Object.const_get(klass)
+
+      attrs = hash.transform_values do |value|
+        case value
+        when Symbol then build(value)
+        when Hash then value[:type] ? build(value) : value
+        when Array then value.map { |v| v.is_a?(Hash) && v[:type] ? build(v) : v }
+        else value
+        end
+      end
+
+      klass.new(**attrs)
+    end
+
+    def self.resolve(name)
+      value = Arosa.config.public_send(name)
+      raise ArgumentError, "No config found for :#{name}" unless value
+
+      value
+    end
+
     class << self
       def properties
         @properties ||= {}
