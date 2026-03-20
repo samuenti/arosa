@@ -4,7 +4,7 @@ module Arosa
   class Config
     attr_accessor :separator, :hreflang, :hreflang_pattern,
                   :hreflang_opt_in, :hreflang_default, :auto_canonical,
-                  :auto_og, :auto_twitter
+                  :auto_og, :auto_twitter, :twitter_site
 
     def to_h
       h = {}
@@ -16,6 +16,7 @@ module Arosa
       h[:auto_canonical] = auto_canonical unless auto_canonical.nil?
       h[:auto_og] = auto_og unless auto_og.nil?
       h[:auto_twitter] = auto_twitter unless auto_twitter.nil?
+      h[:twitter_site] = twitter_site if twitter_site
       h
     end
   end

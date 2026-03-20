@@ -28,7 +28,7 @@ module Arosa
       tags << robots_tag(merged)
       tags << refresh_tag(merged[:refresh])
       tags.concat(hreflang_tags(merged, request: request))
-      tags.concat(og_tags(merged))
+      tags.concat(og_tags(merged, request: request))
       tags.concat(twitter_tags(merged))
 
       tags.compact.join("\n")
@@ -106,7 +106,7 @@ module Arosa
       return [] unless request
 
       pattern = merged[:hreflang_pattern]
-      fullpath = request.fullpath
+      fullpath = strip_locale(request.fullpath, default_locales)
       origin = "#{request.scheme}://#{request.host}"
 
       x_default = merged[:hreflang_default] || default_locales&.first
@@ -124,12 +124,14 @@ module Arosa
       tags
     end
 
-    def og_tags(merged)
+    def og_tags(merged, request: nil)
       return [] if merged[:auto_og] == false && !merged[:og]
 
       og = (merged[:og] || {}).dup
       og[:title] ||= merged[:title]
       og[:description] ||= merged[:description]
+      og[:type] ||= "website"
+      og[:url] ||= request&.url
       return [] if og.compact.empty?
 
       og.compact.map do |key, value|
@@ -142,6 +144,8 @@ module Arosa
 
       twitter = (merged[:twitter] || {}).dup
       og = merged[:auto_og] == false ? {} : (merged[:og] || {})
+      twitter[:card] ||= "summary"
+      twitter[:site] ||= merged[:twitter_site]
       twitter[:title] ||= og[:title] || merged[:title]
       twitter[:description] ||= og[:description] || merged[:description]
       twitter[:image] ||= og[:image]
@@ -150,6 +154,16 @@ module Arosa
       twitter.compact.map do |key, value|
         %(<meta name="twitter:#{escape(key)}" content="#{escape(value)}">)
       end
+    end
+
+    def strip_locale(fullpath, locales)
+      locales.each do |locale|
+        prefix = "/#{locale}"
+        next unless fullpath.start_with?("#{prefix}/") || fullpath == prefix
+
+        return fullpath.delete_prefix(prefix)
+      end
+      fullpath
     end
 
     def build_hreflang_href(locale, pattern, fullpath, origin)

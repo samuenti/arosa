@@ -39,6 +39,7 @@ Arosa.config.hreflang_opt_in = true
 Arosa.config.hreflang_default = "en"
 Arosa.config.auto_og = false
 Arosa.config.auto_twitter = false
+Arosa.config.twitter_site = "@acme"
 ```
 
 | Option | Description |
@@ -51,6 +52,7 @@ Arosa.config.auto_twitter = false
 | `hreflang_default` | Locale for `x-default`. Default: first in the `hreflang` array |
 | `auto_og` | Auto-generate Open Graph tags from title/description. Default: `true` |
 | `auto_twitter` | Auto-generate Twitter Card tags from title/description. Default: `true` |
+| `twitter_site` | Your X/Twitter handle (e.g. `"@acme"`). Included in all Twitter Cards |
 
 These options can only be set in the config.
 
@@ -171,7 +173,16 @@ Output:
 
 ### Open Graph
 
-`og:title` and `og:description` are automatically set from `title` and `description`. Override them or add more:
+The following tags are set automatically:
+
+| Tag | Source |
+|-----|--------|
+| `og:title` | From `title` |
+| `og:description` | From `description` |
+| `og:type` | Defaults to `"website"` |
+| `og:url` | From the current request URL |
+
+Override any of them or add more via the `og:` hash:
 
 ```ruby
 set_arosa(
@@ -186,8 +197,9 @@ Output:
 ```html
 <meta property="og:title" content="Arosa to Lenzerheide">
 <meta property="og:description" content="The complete trail guide.">
-<meta property="og:image" content="https://example.com/trail.jpg">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://example.com/trails/arosa-lenzerheide">
+<meta property="og:image" content="https://example.com/trail.jpg">
 ```
 
 To use a different title or description for social:
@@ -201,8 +213,20 @@ set_arosa(
 
 ### Twitter Cards
 
+The following tags are set automatically:
+
+| Tag | Source |
+|-----|--------|
+| `twitter:card` | Defaults to `"summary"` |
+| `twitter:site` | From `twitter_site` in config |
+| `twitter:title` | From `og:title` or `title` |
+| `twitter:description` | From `og:description` or `description` |
+| `twitter:image` | From `og:image` |
+
+Override any of them via the `twitter:` hash:
+
 ```ruby
-set_arosa twitter: { card: "summary_large_image", site: "@acme" }
+set_arosa twitter: { card: "summary_large_image" }
 ```
 
 Output:
@@ -210,6 +234,8 @@ Output:
 ```html
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@acme">
+<meta name="twitter:title" content="Arosa to Lenzerheide">
+<meta name="twitter:description" content="The complete trail guide.">
 ```
 
 ### Hreflang
@@ -285,6 +311,22 @@ set_arosa(
 ```
 
 Nested hashes with a `type:` key are automatically built into schema objects. The JSON-LD `<script>` tag is rendered by `arosa_tags` in the layout alongside everything else.
+
+### Multiple schemas
+
+Pass an array to render multiple schemas on the same page:
+
+```ruby
+set_arosa schema: [
+  :organization,
+  { type: :breadcrumb_list, item_list_element: [
+    { type: :list_item, position: 1, name: "Home", item: "https://example.com" },
+    { type: :list_item, position: 2, name: "Trails" }
+  ] }
+]
+```
+
+Each schema renders as a separate `<script type="application/ld+json">` tag.
 
 ### Supported Types
 
