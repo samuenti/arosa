@@ -110,14 +110,16 @@ module Arosa
       origin = "#{request.scheme}://#{request.host}"
 
       x_default = merged[:hreflang_default] || default_locales&.first
+      prefix_default = merged[:hreflang_prefix_default]
 
       tags = locales.map do |locale|
-        href = build_hreflang_href(locale, pattern, fullpath, origin)
+        skip = !prefix_default && locale.to_s == x_default.to_s
+        href = build_hreflang_href(locale, pattern, fullpath, origin, skip_prefix: skip)
         %(<link rel="alternate" hreflang="#{escape(locale)}" href="#{escape(href)}">)
       end
 
       if x_default
-        href = build_hreflang_href(x_default, pattern, fullpath, origin)
+        href = build_hreflang_href(x_default, pattern, fullpath, origin, skip_prefix: !prefix_default)
         tags << %(<link rel="alternate" hreflang="x-default" href="#{escape(href)}">)
       end
 
@@ -166,8 +168,10 @@ module Arosa
       fullpath
     end
 
-    def build_hreflang_href(locale, pattern, fullpath, origin)
-      if pattern
+    def build_hreflang_href(locale, pattern, fullpath, origin, skip_prefix: false)
+      if skip_prefix
+        "#{origin}#{fullpath}"
+      elsif pattern
         pattern.gsub(":locale", locale.to_s).gsub(":path", fullpath)
       else
         "#{origin}/#{locale}#{fullpath}"

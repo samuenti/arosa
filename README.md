@@ -50,6 +50,7 @@ Arosa.config.twitter_site = "@acme"
 | `hreflang_pattern` | Custom URL pattern. Use `:locale` and `:path` as placeholders. Default: `/:locale/path` |
 | `hreflang_opt_in` | Pages must opt in to hreflang instead of global. Default: `false` |
 | `hreflang_default` | Locale for `x-default`. Default: first in the `hreflang` array |
+| `hreflang_prefix_default` | Prefix the default locale in URLs. Default: `false` |
 | `auto_og` | Auto-generate Open Graph tags from title/description. Default: `true` |
 | `auto_twitter` | Auto-generate Twitter Card tags from title/description. Default: `true` |
 | `twitter_site` | Your X/Twitter handle (e.g. `"@acme"`). Included in all Twitter Cards |
@@ -242,19 +243,23 @@ Output:
 
 Configure your locales in the initializer (see [Configuration](#configuration)). Hreflang tags are generated automatically on every page.
 
-Output (on `https://example.com/articles/1`):
+The default locale (first in the array) is unprefixed. Other locales get a `/:locale` prefix.
+
+Output (on `https://example.com/articles/1` with `hreflang: ["en", "de", "fr", "it"]`):
 
 ```html
-<link rel="alternate" hreflang="en" href="https://example.com/en/articles/1">
+<link rel="alternate" hreflang="en" href="https://example.com/articles/1">
 <link rel="alternate" hreflang="de" href="https://example.com/de/articles/1">
 <link rel="alternate" hreflang="fr" href="https://example.com/fr/articles/1">
 <link rel="alternate" hreflang="it" href="https://example.com/it/articles/1">
-<link rel="alternate" hreflang="x-default" href="https://example.com/en/articles/1">
+<link rel="alternate" hreflang="x-default" href="https://example.com/articles/1">
 ```
+
+If all locales are prefixed (including the default), set `hreflang_prefix_default` to `true` in the config.
 
 An `x-default` tag is automatically included, pointing to the first locale in the array. Override with `hreflang_default` in the config.
 
-By default, URLs are built as `/:locale/path`. For other structures, set `hreflang_pattern` in the config.
+For other URL structures, set `hreflang_pattern` in the config.
 
 URL parameters are also supported but [not recommended by Google](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites):
 
