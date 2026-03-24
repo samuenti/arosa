@@ -159,13 +159,16 @@ module Arosa
     end
 
     def strip_locale(fullpath, locales)
+      path = fullpath
       locales.each do |locale|
         prefix = "/#{locale}"
-        next unless fullpath.start_with?("#{prefix}/") || fullpath == prefix
+        next unless path.start_with?("#{prefix}/") || path == prefix
 
-        return fullpath.delete_prefix(prefix)
+        path = path.delete_prefix(prefix)
+        break
       end
-      fullpath
+      path = "" if path == "/"
+      path
     end
 
     def build_hreflang_href(locale, pattern, fullpath, origin, skip_prefix: false)
